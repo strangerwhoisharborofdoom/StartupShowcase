@@ -42,6 +42,7 @@ export default function EditIdeaPage({ params }: { params: any }) {
     team_description: "",
     category: "",
     tags: "",
+    whatsapp_group_url: "",
   })
   const [idea, setIdea] = useState<any>(null)
   const [files, setFiles] = useState<any[]>([])
@@ -82,6 +83,7 @@ export default function EditIdeaPage({ params }: { params: any }) {
         team_description: data.team_description || "",
         category: data.category,
         tags: (data.tags || []).join(", "),
+        whatsapp_group_url: data.whatsapp_group_url || "",
       })
 
       // Fetch files
@@ -124,6 +126,7 @@ export default function EditIdeaPage({ params }: { params: any }) {
           tags: tags,
           status: asDraft ? "draft" : "submitted",
           updated_at: new Date().toISOString(),
+          whatsapp_group_url: formData.whatsapp_group_url || null,
         })
         .eq("id", unwrappedParams.id)
 
@@ -277,6 +280,20 @@ export default function EditIdeaPage({ params }: { params: any }) {
                     value={formData.tags}
                     onChange={handleChange}
                   />
+                </div>
+
+                {/* WhatsApp Group URL */}
+                <div>
+                  <Label htmlFor="whatsapp_group_url">WhatsApp Group Link (Optional)</Label>
+                  <Input
+                    id="whatsapp_group_url"
+                    name="whatsapp_group_url"
+                    type="url"
+                    placeholder="https://chat.whatsapp.com/..."
+                    value={formData.whatsapp_group_url}
+                    onChange={handleChange}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">Share your WhatsApp group invite link for community collaboration</p>
                 </div>
 
                 <div className="border-t pt-6">

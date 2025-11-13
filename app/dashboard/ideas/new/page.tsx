@@ -37,6 +37,7 @@ export default function NewIdeaPage() {
     team_description: "",
     category: "",
     tags: "",
+    whatsapp_group_url: "",
   })
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -78,6 +79,7 @@ export default function NewIdeaPage() {
           category: formData.category,
           tags: tags,
           status: "draft",
+          whatsapp_group_url: formData.whatsapp_group_url || null,
         })
         .select()
         .single()
@@ -86,7 +88,27 @@ export default function NewIdeaPage() {
 
       router.push(`/dashboard/ideas/${data.id}/edit`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create idea")
+      // Surface more detailed Supabase/Postgres error info for debugging
+      console.error("Create idea failed:", err)
+      let message = "Failed to create idea"
+      if (err && typeof err === "object") {
+        const anyErr = err as any
+        if (typeof anyErr.message === "string") message = anyErr.message
+        // Include details if available (PostgrestError provides details property)
+        if (typeof anyErr.details === "string" && anyErr.details.length) {
+          message += `: ${anyErr.details}`
+        }
+        if (typeof anyErr.hint === "string" && anyErr.hint.length) {
+          message += ` (Hint: ${anyErr.hint})`
+        }
+        if (typeof anyErr.code === "string" && anyErr.code.length) {
+          message += ` [Code: ${anyErr.code}]`
+          if (anyErr.code === 'PGRST204') {
+            message += `\nFix: Run migration in Supabase SQL Editor -> ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS whatsapp_group_url TEXT; then in Dashboard Settings > API click 'Reload schema cache'.`
+          }
+        }
+      }
+      setError(message)
     } finally {
       setIsLoading(false)
     }
@@ -212,6 +234,20 @@ export default function NewIdeaPage() {
                     onChange={handleChange}
                   />
                   <p className="text-xs text-muted-foreground mt-2">Separate tags with commas</p>
+                </div>
+
+                {/* WhatsApp Group URL */}
+                <div>
+                  <Label htmlFor="whatsapp_group_url">WhatsApp Group Link (Optional)</Label>
+                  <Input
+                    id="whatsapp_group_url"
+                    name="whatsapp_group_url"
+                    type="url"
+                    placeholder="https://chat.whatsapp.com/..."
+                    value={formData.whatsapp_group_url}
+                    onChange={handleChange}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">Share your WhatsApp group invite link for community collaboration</p>
                 </div>
 
                 {error && <p className="text-sm text-error">{error}</p>}
