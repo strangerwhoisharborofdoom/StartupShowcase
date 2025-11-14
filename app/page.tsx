@@ -93,7 +93,7 @@ export default async function Home() {
               <div className="text-sm text-neutral-dark">Students</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-black"><CountUp end={12} suffix="+" className="inline-block" /></div>
+              <div className="text-3xl font-bold text-accent"><CountUp end={12} suffix="+" className="inline-block" /></div>
               <div className="text-sm text-neutral-dark">Categories</div>
             </div>
             <div className="text-center">

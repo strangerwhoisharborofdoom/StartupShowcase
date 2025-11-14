@@ -36,12 +36,16 @@ export function Navbar() {
             StartupShowcase
           </Link>
 
-          <div className="hidden md:flex items-center gap-3 flex-nowrap">
-            {user && (
-              <Link href="/dashboard" className="text-foreground hover:text-primary transition whitespace-nowrap">
-                Dashboard
-              </Link>
-            )}
+          <div className="hidden md:flex items-center gap-4 flex-nowrap">
+            <Link href="/events" className="text-foreground hover:text-primary transition whitespace-nowrap">
+              Events
+            </Link>
+            <Link href="/browse" className="text-foreground hover:text-primary transition whitespace-nowrap">
+              Startups
+            </Link>
+            <Link href="/dashboard/ideas/new" className="text-foreground hover:text-primary transition whitespace-nowrap">
+              Submit Idea
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center gap-2">
@@ -85,12 +89,17 @@ export function Navbar() {
                 <nav className="flex flex-col gap-2">
                   {user ? (
                     <>
-                      <Link href="/dashboard/ideas/new" className="px-3 py-2 rounded-md hover:bg-muted/50">Create Idea</Link>
+                      <Link href="/events" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Events</Link>
+                      <Link href="/browse" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Startups</Link>
+                      <Link href="/dashboard/ideas/new" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Submit Idea</Link>
                       <a href={`mailto:support@startupshowcaseportal.com`} className="px-3 py-2 rounded-md hover:bg-muted/50">Mail</a>
                       <button onClick={() => { setIsOpen(false); handleLogout(); }} className="text-left px-3 py-2 rounded-md hover:bg-muted/50">Logout</button>
                     </>
                   ) : (
                     <>
+                      <Link href="/events" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Events</Link>
+                      <Link href="/browse" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Startups</Link>
+                      <Link href="/dashboard/ideas/new" onClick={() => setIsOpen(false)} className="px-3 py-2 rounded-md hover:bg-muted/50">Submit Idea</Link>
                       <Link href="/auth/login" className="px-3 py-2 rounded-md hover:bg-muted/50">Log In</Link>
                       <Link href="/auth/sign-up" className="px-3 py-2 rounded-md hover:bg-muted/50">Sign Up</Link>
                       <a href={`mailto:support@startupshowcaseportal.com`} className="px-3 py-2 rounded-md hover:bg-muted/50">Mail</a>

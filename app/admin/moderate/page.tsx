@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { AdminNavbar } from "@/components/admin-navbar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,11 +8,23 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle, Star, FileText } from "lucide-react"
 import Link from "next/link"
 import { FileOpener } from "@/components/file-opener"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function ModerationPage() {
   const [ideas, setIdeas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [openId, setOpenId] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  const [featuredFilter, setFeaturedFilter] = useState("all")
+  const [categories, setCategories] = useState<string[]>([])
   const supabase = createClient()
 
   useEffect(() => {
@@ -33,7 +45,8 @@ export default function ModerationPage() {
                   return
                 }
 
-                setIdeas((json && json.ideas) || [])
+                const fetchedIdeas = (json && json.ideas) || []
+                setIdeas(fetchedIdeas)
       } catch (err) {
         console.error("Unexpected error loading pending ideas:", err)
       } finally {
@@ -44,13 +57,54 @@ export default function ModerationPage() {
     loadPendingIdeas()
   }, [supabase])
 
+  useEffect(() => {
+    const uniqueCategories = Array.from(
+      new Set(
+        ideas
+          .map((idea) => idea.category)
+          .filter((category): category is string => Boolean(category))
+      )
+    ).sort()
+    setCategories(uniqueCategories)
+  }, [ideas])
+
+  const filteredIdeas = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+
+    return ideas.filter((idea) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        [
+          idea.title,
+          idea.problem_statement,
+          idea.solution,
+          idea.profiles?.full_name,
+          idea.profiles?.email,
+          idea.category,
+          (idea.tags || []).join(" "),
+        ]
+          .filter(Boolean)
+          .some((field: string) => field.toLowerCase().includes(normalizedSearch))
+
+      const matchesCategory =
+        categoryFilter === "all" ||
+        (idea.category || "").toLowerCase() === categoryFilter.toLowerCase()
+
+      const matchesFeatured =
+        featuredFilter === "all" ||
+        (featuredFilter === "featured" ? idea.is_featured : !idea.is_featured)
+
+      return matchesSearch && matchesCategory && matchesFeatured
+    })
+  }, [ideas, searchTerm, categoryFilter, featuredFilter])
+
   const approveIdea = async (id: string) => {
     const { error } = await supabase.from("ideas").update({ status: "approved" }).eq("id", id)
 
     if (error) {
       alert("Error approving idea")
     } else {
-      setIdeas(ideas.filter((idea) => idea.id !== id))
+      setIdeas((prev) => prev.filter((idea) => idea.id !== id))
     }
   }
 
@@ -60,7 +114,7 @@ export default function ModerationPage() {
     if (error) {
       alert("Error rejecting idea")
     } else {
-      setIdeas(ideas.filter((idea) => idea.id !== id))
+      setIdeas((prev) => prev.filter((idea) => idea.id !== id))
     }
   }
 
@@ -70,7 +124,7 @@ export default function ModerationPage() {
     if (error) {
       alert("Error featuring idea")
     } else {
-      setIdeas(ideas.map((idea) => (idea.id === id ? { ...idea, is_featured: true } : idea)))
+      setIdeas((prev) => prev.map((idea) => (idea.id === id ? { ...idea, is_featured: true } : idea)))
     }
   }
 
@@ -80,7 +134,7 @@ export default function ModerationPage() {
     if (error) {
       alert("Error unfeaturing idea")
     } else {
-      setIdeas(ideas.map((idea) => (idea.id === id ? { ...idea, is_featured: false } : idea)))
+      setIdeas((prev) => prev.map((idea) => (idea.id === id ? { ...idea, is_featured: false } : idea)))
     }
   }
 
@@ -100,11 +154,53 @@ export default function ModerationPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : ideas.length > 0 ? (
-            <div className="space-y-4">
-              {ideas.map((idea: any) => {
-                const isOpen = openId === idea.id
-                return (
-                  <Card key={idea.id} className="overflow-hidden">
+            <>
+              <div className="mb-6 grid gap-4 md:grid-cols-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground">Search ideas</label>
+                  <Input
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search by title, founder, tags..."
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground">Category</label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All categories</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground">Featured</label>
+                  <Select value={featuredFilter} onValueChange={setFeaturedFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All ideas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All ideas</SelectItem>
+                      <SelectItem value="featured">Featured only</SelectItem>
+                      <SelectItem value="standard">Not featured</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {filteredIdeas.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredIdeas.map((idea: any) => {
+                    const isOpen = openId === idea.id
+                    return (
+                      <Card key={idea.id} className="overflow-hidden">
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
@@ -253,10 +349,25 @@ export default function ModerationPage() {
                         </div>
                       )}
                     </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
+                      </Card>
+                    )
+                  })}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <p className="text-muted-foreground">No ideas match your current filters.</p>
+                    <Button variant="link" className="mt-2" onClick={() => {
+                      setSearchTerm("")
+                      setCategoryFilter("all")
+                      setFeaturedFilter("all")
+                    }}>
+                      Reset filters
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           ) : (
             <Card>
               <CardContent className="pt-12 text-center pb-12">
