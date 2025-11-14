@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { signOut } from "@/lib/supabase/auth"
-import { LayoutDashboard, CheckCircle, BarChart3, Users, LogOut } from "lucide-react"
+import { LayoutDashboard, CheckCircle, BarChart3, Users, CalendarDays, LogOut } from "lucide-react"
 
 export function AdminNavbar() {
   const router = useRouter()
@@ -17,6 +17,7 @@ export function AdminNavbar() {
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/moderate", label: "Moderation Queue", icon: CheckCircle },
+    { href: "/admin/events", label: "Events", icon: CalendarDays },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     { href: "/admin/users", label: "Users", icon: Users },
   ]

@@ -39,7 +39,7 @@ export default function EditEventPage({ params }: { params: any }) {
         setForm({
           title: data.title || '',
           description: data.description || '',
-          event_date: data.event_date ? new Date(data.event_date).toISOString().slice(0,16) : '',
+          event_date: data.event_date ? new Date(data.event_date).toISOString().slice(0,10) : '',
           location: data.location || '',
           registration_link: data.registration_link || '',
           status: data.status || 'draft',
@@ -108,8 +108,8 @@ export default function EditEventPage({ params }: { params: any }) {
                   <textarea id="description" name="description" value={form.description} onChange={handleChange} rows={4} className="w-full px-3 py-2 border border-border rounded-lg" />
                 </div>
                 <div>
-                  <Label htmlFor="event_date">Date & Time *</Label>
-                  <Input id="event_date" name="event_date" type="datetime-local" value={form.event_date} onChange={handleChange} required />
+                  <Label htmlFor="event_date">Date *</Label>
+                  <Input id="event_date" name="event_date" type="date" value={form.event_date} onChange={handleChange} required />
                 </div>
                 <div>
                   <Label htmlFor="location">Location</Label>

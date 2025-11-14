@@ -204,6 +204,17 @@ export default function ModerationPage() {
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
+                          {(() => {
+                            const name =
+                              idea.profiles?.full_name ||
+                              idea.profiles?.email ||
+                              idea.full_name ||
+                              idea.email ||
+                              "Unknown"
+                            return (
+                              <p className="text-sm text-muted-foreground mb-1">By: {name}</p>
+                            )
+                          })()}
                           <h3 className="text-xl font-bold text-foreground mb-1">
                             <button
                               onClick={() => setOpenId(isOpen ? null : idea.id)}
@@ -212,7 +223,6 @@ export default function ModerationPage() {
                               {idea.title}
                             </button>
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-2">By: {idea.profiles?.full_name || "Unknown"}</p>
                           <div className="text-sm text-foreground">
                             <p className="line-clamp-3">{idea.problem_statement}</p>
                             <p className="mt-2 line-clamp-3 text-muted-foreground">{idea.solution}</p>
@@ -259,7 +269,13 @@ export default function ModerationPage() {
 
                             <div className="space-y-1 text-right">
                               <div className="text-sm text-muted-foreground">Author</div>
-                              <div className="text-foreground">{idea.profiles?.full_name || idea.profiles?.email || 'Unknown'}</div>
+                              <div className="text-foreground">
+                                {idea.profiles?.full_name ||
+                                  idea.profiles?.email ||
+                                  idea.full_name ||
+                                  idea.email ||
+                                  "Unknown"}
+                              </div>
                             </div>
                           </div>
 

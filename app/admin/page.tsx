@@ -166,6 +166,12 @@ export default function AdminDashboardPage() {
                     >
                       Manage Users
                     </Link>
+                    <Link
+                      href="/admin/events"
+                      className="block p-3 bg-accent/10 text-foreground rounded-lg hover:bg-accent/20 transition font-medium"
+                    >
+                      Manage Events
+                    </Link>
                   </CardContent>
                 </Card>
 
